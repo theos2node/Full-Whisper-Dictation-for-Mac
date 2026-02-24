@@ -1,18 +1,33 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+from PyInstaller.utils.hooks import collect_data_files, collect_submodules
+
+hidden = [
+    "whisperdictation.app",
+    "mlx_whisper",
+    "whisper",
+    "mlx._reprlib_fix",
+    "imageio_ffmpeg",
+]
+hidden += collect_submodules("mlx_whisper")
+hidden += collect_submodules("mlx")
+hidden += collect_submodules("imageio_ffmpeg")
+datas = collect_data_files("whisper", includes=["assets/*"])
+datas += collect_data_files("mlx", includes=["lib/*.metallib"])
+datas += collect_data_files("mlx_whisper", includes=["assets/*"])
+datas += collect_data_files("imageio_ffmpeg", includes=["binaries/*"])
 
 a = Analysis(
-    ['src/main.py'],
-    pathex=[],
+    ["src/main.py"],
+    pathex=["src"],
     binaries=[],
-    datas=[('src', 'src')],
-    hiddenimports=['numba', 'numba.core', 'numba.core.types', 'numba.core.types.scalars', 'numba.core.types.old_scalars', 'whisperdictation.app'],
+    datas=datas,
+    hiddenimports=hidden,
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
     excludes=[],
     noarchive=False,
-    optimize=0,
 )
 pyz = PYZ(a.pure)
 
@@ -21,30 +36,41 @@ exe = EXE(
     a.scripts,
     [],
     exclude_binaries=True,
-    name='Whisper Dictation',
+    name="Whisper Dictation",
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
-    upx=True,
+    upx=False,
     console=False,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
     codesign_identity=None,
-    entitlements_file=None,
+    entitlements_file="entitlements.plist",
 )
+
 coll = COLLECT(
     exe,
     a.binaries,
     a.datas,
     strip=False,
-    upx=True,
+    upx=False,
     upx_exclude=[],
-    name='Whisper Dictation',
+    name="Whisper Dictation",
 )
+
 app = BUNDLE(
     coll,
-    name='Whisper Dictation.app',
+    name="Whisper Dictation.app",
     icon=None,
-    bundle_identifier='com.whisperdictation.app',
+    bundle_identifier="com.whisperdictation.app",
+    info_plist={
+        "CFBundleName": "Whisper Dictation",
+        "CFBundleDisplayName": "Whisper Dictation",
+        "CFBundleIdentifier": "com.whisperdictation.app",
+        "CFBundleShortVersionString": "0.4.0",
+        "CFBundleVersion": "0.4.0",
+        "LSMinimumSystemVersion": "13.0",
+        "NSMicrophoneUsageDescription": "Whisper Dictation needs microphone access to transcribe speech.",
+    },
 )

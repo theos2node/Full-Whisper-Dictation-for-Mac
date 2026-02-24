@@ -1,5 +1,5 @@
-"""Whisper Dictation for Mac - Local speech recognition using OpenAI's Whisper."""
+"""Whisper Dictation for Mac - local push-to-talk speech recognition."""
 
-__version__ = "0.1.0"
-__author__ = "Your Name"
-__license__ = "MIT" 
+__version__ = "0.4.0"
+__author__ = "theos2node"
+__license__ = "MIT"

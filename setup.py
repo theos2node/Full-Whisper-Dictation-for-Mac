@@ -1,61 +1,24 @@
-"""Setup script for Whisper Dictation Mac."""
+"""Package metadata for Whisper Dictation."""
 
-from setuptools import setup
+from setuptools import find_packages, setup
 
-APP = ['src/main.py']
-DATA_FILES = []
-OPTIONS = {
-    'argv_emulation': True,
-    'packages': [
-        'PyQt6',
-        'whisper',
-        'numpy',
-        'sounddevice',
-        'keyboard',
-        'pyperclip',
-        'scipy',
-        'numba',
-        'llvmlite',
-        'torch',
-        'regex',
-        'tiktoken',
-        'certifi'
-    ],
-    'includes': [
-        'numba.core.types.old_scalars',
-        'numba.core.types',
-        'numba.core',
-        'numba.np',
-        'numba.np.ufunc'
-    ],
-    'frameworks': ['libSystem.B.dylib'],
-    'plist': {
-        'CFBundleName': 'Whisper Dictation',
-        'CFBundleDisplayName': 'Whisper Dictation',
-        'CFBundleIdentifier': 'com.whisperdictation.app',
-        'CFBundleVersion': '1.0.0',
-        'CFBundleShortVersionString': '1.0.0',
-        'LSMinimumSystemVersion': '10.10',
-        'NSMicrophoneUsageDescription': 'Microphone access is required for speech recognition.',
-        'NSAppleEventsUsageDescription': 'Apple Events are used for keyboard shortcuts.',
-    }
-}
 
 setup(
-    name='whisper-dictation-mac',
-    app=APP,
-    data_files=DATA_FILES,
-    options={'py2app': OPTIONS},
-    setup_requires=['py2app'],
+    name="whisper-dictation-mac",
+    version="0.4.0",
+    description="Local push-to-talk dictation for macOS",
+    python_requires=">=3.10,<3.14",
+    package_dir={"": "src"},
+    packages=find_packages("src"),
     install_requires=[
-        'openai-whisper>=0.0.1',
-        'PyQt6>=6.4.0',
-        'numpy>=1.24.1',
-        'sounddevice>=0.4.6',
-        'keyboard>=0.13.5',
-        'pyperclip>=1.8.2',
-        'scipy>=1.10.0',
-        'numba>=0.57.1',
-        'llvmlite>=0.41.0'
+        "mlx-whisper>=0.4.1",
+        "openai-whisper>=20231117",
+        "sounddevice>=0.4.6",
+        "numpy>=1.24.0",
+        "PyQt6>=6.5.0",
+        "pynput>=1.7.7",
+        "pyperclip>=1.8.2",
+        "scipy>=1.11.0",
+        "imageio-ffmpeg>=0.6.0",
     ],
-) 
+)
