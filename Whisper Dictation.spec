@@ -16,6 +16,7 @@ datas = collect_data_files("whisper", includes=["assets/*"])
 datas += collect_data_files("mlx", includes=["lib/*.metallib"])
 datas += collect_data_files("mlx_whisper", includes=["assets/*"])
 datas += collect_data_files("imageio_ffmpeg", includes=["binaries/*"])
+datas += [("assets/AppIcon.png", "assets"), ("assets/AppIcon.icns", "assets")]
 
 a = Analysis(
     ["src/main.py"],
@@ -62,7 +63,7 @@ coll = COLLECT(
 app = BUNDLE(
     coll,
     name="Whisper Dictation.app",
-    icon=None,
+    icon="assets/AppIcon.icns",
     bundle_identifier="com.whisperdictation.app",
     info_plist={
         "CFBundleName": "Whisper Dictation",

@@ -15,7 +15,7 @@ import pyperclip
 import sounddevice as sd
 from pynput import keyboard as pynput_keyboard
 from PyQt6.QtCore import QEvent, QObject, Qt, QUrl, pyqtSignal
-from PyQt6.QtGui import QAction, QDesktopServices
+from PyQt6.QtGui import QAction, QDesktopServices, QIcon
 from PyQt6.QtWidgets import (
     QApplication,
     QDialog,
@@ -1000,6 +1000,9 @@ class WhisperDictationApp(QMainWindow):
         self.setWindowTitle("Whisper Dictation")
         self.setGeometry(120, 120, 980, 620)
         self.setMinimumSize(820, 520)
+        app_icon = self._load_app_icon()
+        if not app_icon.isNull():
+            self.setWindowIcon(app_icon)
         self._apply_styles()
 
         central_widget = QWidget()
@@ -1758,7 +1761,9 @@ class WhisperDictationApp(QMainWindow):
             self.logger.warning("System tray is not available; background menu icon disabled")
             return
         self.tray_icon = QSystemTrayIcon(self)
-        tray_icon = self.style().standardIcon(QStyle.StandardPixmap.SP_MediaVolume)
+        tray_icon = self._load_app_icon()
+        if tray_icon.isNull():
+            tray_icon = self.style().standardIcon(QStyle.StandardPixmap.SP_ComputerIcon)
         self.tray_icon.setIcon(tray_icon)
         self.setWindowIcon(tray_icon)
         self.tray_icon.setToolTip("Whisper Dictation")
@@ -1777,6 +1782,32 @@ class WhisperDictationApp(QMainWindow):
         self.tray_icon.setContextMenu(menu)
         self.tray_icon.activated.connect(self._on_tray_activated)
         self.tray_icon.show()
+
+    def _icon_candidates(self) -> list[Path]:
+        candidates: list[Path] = []
+        try:
+            base = Path(__file__).resolve().parents[2]
+            candidates.append(base / "assets" / "AppIcon.png")
+        except Exception:
+            pass
+
+        meipass = getattr(sys, "_MEIPASS", None)
+        if meipass:
+            candidates.append(Path(meipass) / "assets" / "AppIcon.png")
+
+        try:
+            bundle_resources = Path(sys.executable).resolve().parents[1] / "Resources"
+            candidates.append(bundle_resources / "assets" / "AppIcon.png")
+        except Exception:
+            pass
+
+        return candidates
+
+    def _load_app_icon(self) -> QIcon:
+        for candidate in self._icon_candidates():
+            if candidate.exists():
+                return QIcon(str(candidate))
+        return QIcon()
 
     def _on_tray_activated(self, reason: QSystemTrayIcon.ActivationReason):
         if reason in (

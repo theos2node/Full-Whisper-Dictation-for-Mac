@@ -1,46 +1,94 @@
 # Whisper Dictation for macOS
 
-Open-source local dictation for Apple Silicon Macs.
+Wispr Flow-style press-and-hold dictation, running fully local on Apple Silicon.
 
-Hold a hotkey, speak, release to transcribe. A compact overlay shows `Listening...` and `Transcribing...`. Transcripts are saved in-app and copied to clipboard.
+![Whisper Dictation App Icon](assets/AppIcon.png)
 
-## Current behavior (v0.4.0)
+## What this project is
 
-- Local UI hold-to-talk by default (reliable mode):
-  App listens while Whisper Dictation is the focused app window.
-- Clipboard output:
-  When transcription completes, text is copied to clipboard.
-- Persistent history:
-  Every transcription is stored in the app and can be clicked to copy.
-- Apple Silicon first backend:
-  `mlx-whisper` primary, `openai-whisper` fallback.
+Whisper Dictation is a local-first voice-to-text system for macOS:
 
-## Download and install
+- Press and hold to talk.
+- Release to transcribe.
+- Keep output in clipboard for paste-anywhere workflows.
+- Persist every transcript in an indexed in-app history.
+
+No cloud API keys, no subscription, no remote inference required.
+
+## Product behavior
+
+Default mode is `local` for maximum reliability:
+
+- Hotkey is captured while Whisper Dictation is the active app window.
+- Overlay gives immediate state feedback: `Listening...` then `Transcribing...`.
+- Completed transcript is copied to clipboard.
+
+Optional `global` mode is available:
+
+- Captures hold-to-talk outside the app window.
+- Requires Accessibility + Input Monitoring permissions.
+
+## Technical stack
+
+- UI/runtime: `PyQt6`
+- Audio I/O: `sounddevice` (PortAudio backend)
+- DSP / serialization: `numpy`, `scipy` (`wavfile`)
+- Primary ASR backend: `mlx-whisper` (Apple Silicon optimized local inference)
+- Fallback ASR backend: `openai-whisper`
+- Packaging: `PyInstaller` (`.app` bundle)
+- Distribution automation: GitHub Actions release workflow
+
+## End-to-end pipeline
+
+1. Hotkey edge detection emits `start_recording`/`stop_recording`.
+2. Audio stream buffers float32 mono frames at 16kHz.
+3. Frames are concatenated and normalized with automatic gain logic.
+4. Audio is serialized to temporary WAV.
+5. ASR backend transcribes (`mlx-whisper` first, fallback on failure).
+6. Transcript is appended to local history (`~/Library/Application Support/WhisperDictation/history.json`).
+7. Transcript is copied to clipboard for immediate paste into any text field.
+
+Architecture details: see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
+## Installation (users)
 
 1. Download `Whisper-Dictation-macOS.zip` from GitHub Releases.
-2. Unzip it.
+2. Unzip.
 3. Drag `Whisper Dictation.app` into `/Applications`.
-4. Open the app.
+4. Launch the app.
 
-If macOS warns the app is from an unidentified developer:
-1. Right-click the app in `/Applications`.
-2. Click `Open`.
-3. Confirm `Open` in the dialog.
+If Gatekeeper warns on first launch:
 
-## First run permissions
+1. Right-click `Whisper Dictation.app`.
+2. Choose `Open`.
+3. Confirm the dialog.
 
-- Microphone is required for dictation.
-- Global mode (optional) additionally needs Accessibility and Input Monitoring.
+## Permissions model
 
-## Usage
+- Required in all modes:
+  - Microphone
+- Required only in `global` hotkey mode:
+  - Accessibility
+  - Input Monitoring
 
-1. Launch `Whisper Dictation.app`.
-2. Hold hotkey (default `Control`) while focused in the app window.
-3. Speak and release.
-4. Text is transcribed and copied to clipboard.
-5. Click a history item to copy it again.
+## Runtime configuration
 
-## Development run
+- `WHISPER_DICTATION_HOTKEY` default: `ctrl`
+- `WHISPER_DICTATION_HOTKEY_SCOPE` default: `local` (`local` or `global`)
+- `WHISPER_DICTATION_MODEL` default: `mlx-community/whisper-large-v3-turbo`
+- `WHISPER_DICTATION_FALLBACK_MODEL` default: `base`
+- `WHISPER_DICTATION_LANGUAGE` default: auto detect
+
+Example:
+
+```bash
+WHISPER_DICTATION_HOTKEY=ctrl \
+WHISPER_DICTATION_HOTKEY_SCOPE=global \
+WHISPER_DICTATION_MODEL=mlx-community/whisper-large-v3-turbo \
+python src/main.py
+```
+
+## Development
 
 ```bash
 git clone https://github.com/theos2node/Full-Whisper-Dictation-for-Mac.git
@@ -52,7 +100,7 @@ pip install -r requirements.txt
 python src/main.py
 ```
 
-## Build app bundle
+## Build and package
 
 ```bash
 python3.11 -m venv .venv
@@ -62,28 +110,28 @@ pip install -r requirements.txt
 ./build.sh
 ```
 
-Build artifacts:
+Artifacts:
 
 - `dist/Whisper Dictation.app`
 - `dist/Whisper-Dictation-macOS.zip`
 
-## Configuration
+## Release process
 
-- `WHISPER_DICTATION_HOTKEY` (default: `ctrl`)
-- `WHISPER_DICTATION_HOTKEY_SCOPE` (default: `local`, optional: `global`)
-- `WHISPER_DICTATION_MODEL` (default: `mlx-community/whisper-large-v3-turbo`)
-- `WHISPER_DICTATION_FALLBACK_MODEL` (default: `base`)
-- `WHISPER_DICTATION_LANGUAGE` (default: auto detect)
+- Tag-driven release workflow lives at:
+  - `.github/workflows/release-macos.yml`
+- Pushing a tag like `v0.4.0` triggers:
+  - macOS app build
+  - zip artifact upload
+  - GitHub Release asset publish
 
-## Release automation
+## Observability and troubleshooting
 
-GitHub Actions workflow builds a macOS app zip on tag pushes (`v*`) and uploads it as a release asset.
-
-## Notes
-
-- First launch warms the model and may take up to about a minute.
-- Runtime log path: `~/Library/Application Support/WhisperDictation/runtime.log`
-- Python 3.11 is the recommended build/runtime version.
+- Runtime log:
+  - `~/Library/Application Support/WhisperDictation/runtime.log`
+- Common checks:
+  - Verify backend load and warmup completion in log.
+  - Verify hotkey mode (`local-ui` or `global` fallback chain).
+  - Verify microphone stream chunk count is non-zero.
 
 ## License
 

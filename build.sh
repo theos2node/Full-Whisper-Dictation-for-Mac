@@ -29,6 +29,10 @@ source .venv/bin/activate
 pip install -U pip
 pip install -r requirements.txt
 
+if [ -f "scripts/generate_app_icon.sh" ] && [ -f "assets/AppIcon-source.jpg" ]; then
+    ./scripts/generate_app_icon.sh
+fi
+
 rm -rf build dist
 pyinstaller --noconfirm --clean "Whisper Dictation.spec"
 
