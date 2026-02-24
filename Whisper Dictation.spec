@@ -69,6 +69,8 @@ app = BUNDLE(
         "CFBundleName": "Whisper Dictation",
         "CFBundleDisplayName": "Whisper Dictation",
         "CFBundleIdentifier": "com.whisperdictation.app",
+        "CFBundleIconFile": "AppIcon.icns",
+        "CFBundleIconName": "AppIcon",
         "CFBundleShortVersionString": "0.4.0",
         "CFBundleVersion": "0.4.0",
         "LSMinimumSystemVersion": "13.0",

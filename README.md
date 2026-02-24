@@ -2,8 +2,6 @@
 
 Wispr Flow-style press-and-hold dictation, running fully local on Apple Silicon.
 
-![Whisper Dictation App Icon](assets/AppIcon.png)
-
 ## What this project is
 
 Whisper Dictation is a local-first voice-to-text system for macOS:
