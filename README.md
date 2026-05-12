@@ -2,6 +2,14 @@
 
 Wispr Flow-style press-and-hold dictation, running fully local on Apple Silicon.
 
+## Portfolio summary
+
+- **Product type:** local-first macOS dictation utility
+- **Core stack:** Python, PyQt6, sounddevice, Quartz/AppKit integration, PyInstaller
+- **Model layer:** `mlx-whisper` first, `openai-whisper` fallback
+- **Privacy posture:** no cloud transcription required; transcripts are stored locally
+- **Workflow:** hold hotkey, speak, release, transcribe, copy to clipboard, save history
+
 ## What this project is
 
 Whisper Dictation is a local-first voice-to-text system for macOS:
