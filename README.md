@@ -96,6 +96,12 @@ python src/main.py
 
 ## Development
 
+Run the persistence unit tests without installing GUI or model dependencies:
+
+```bash
+PYTHONPATH=src python3 -m unittest discover -s tests -v
+```
+
 ```bash
 git clone https://github.com/theos2node/Full-Whisper-Dictation-for-Mac.git
 cd Full-Whisper-Dictation-for-Mac

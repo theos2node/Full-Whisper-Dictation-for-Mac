@@ -10,6 +10,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Callable
 
+from .persistence import load_history, load_settings
+
 import numpy as np
 import pyperclip
 import sounddevice as sd
@@ -1711,35 +1713,14 @@ class WhisperDictationApp(QMainWindow):
             self._insert_history_item(entry, at_top=False)
 
     def _load_settings(self) -> dict:
-        if not self.settings_path.exists():
-            return {"onboarding_complete": False}
-        try:
-            with self.settings_path.open("r", encoding="utf-8") as handle:
-                return json.load(handle)
-        except Exception:
-            return {"onboarding_complete": False}
+        return load_settings(self.settings_path)
 
     def _save_settings(self):
         with self.settings_path.open("w", encoding="utf-8") as handle:
             json.dump(self.settings, handle, indent=2)
 
     def _load_history(self):
-        if not self.history_path.exists():
-            self.history = []
-            return
-        try:
-            with self.history_path.open("r", encoding="utf-8") as handle:
-                loaded = json.load(handle)
-                if isinstance(loaded, list):
-                    self.history = [
-                        item
-                        for item in loaded
-                        if isinstance(item, dict) and "text" in item and "timestamp" in item
-                    ]
-                else:
-                    self.history = []
-        except Exception:
-            self.history = []
+        self.history = load_history(self.history_path)
 
     def _save_history(self):
         with self.history_path.open("w", encoding="utf-8") as handle:
